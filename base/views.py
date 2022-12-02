@@ -3,9 +3,30 @@ from django.urls import reverse
 from .models import Room, Topic
 from .forms import RoomForm
 from django.db.models import Q
+from django.contrib.auth.models import User
+from django.contrib import messages
+from django.contrib.auth import login, logout, authenticate
 
 
 def loginpage(request):
+    if request.method== 'POST':
+        username= request.POST.get('username')
+        password= request.POST.get('password')
+
+        try:
+            user= User.objects.get(username=username)
+        except:
+            messages.error(request, 'user does not exist')
+            
+    
+    user= authenticate(request, username=username, password=password )
+
+    if user is not None:
+        login(request, user)
+        return redirect('homepage')
+    else:
+        messages.error(request, 'username or password incorrect')
+
     return render(request, 'base/login_registration.html')
 
 def home(request):
