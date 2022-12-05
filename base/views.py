@@ -6,7 +6,9 @@ from django.db.models import Q
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.contrib.auth import login, logout, authenticate
-
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse
+from django.http import HttpResponse
 
 def loginpage(request):
     if request.method== 'POST':
@@ -19,15 +21,17 @@ def loginpage(request):
             messages.error(request, 'user does not exist')
             
     
-    user= authenticate(request, username=username, password=password )
+        user= authenticate(username= username, password= password )
 
-    if user is not None:
-        login(request, user)
-        return redirect('homepage')
-    else:
-        messages.error(request, 'username or password incorrect')
+        if user is not None:
+            login(request, user)
+            return redirect('home')
+        else:
+            messages.error(request, 'username or password incorrect')
 
     return render(request, 'base/login_registration.html')
+
+
 
 def home(request):
     q= request.GET.get('q') if request.GET.get('q')!= None else ''
@@ -53,6 +57,7 @@ def room(request, pk):
     return render(request, 'base/room.html', context)
 
 
+@login_required(login_url= 'login')
 def create_room(request):
     form = RoomForm
     if request.method == 'POST':
@@ -66,21 +71,32 @@ def create_room(request):
     context = {'form': form}
     return render(request, 'base/room_form.html', context)
 
+
+@login_required(login_url= 'login')
 def updateRoom(request, pk):
     room= Room.objects.get(id=pk)
     form= RoomForm(instance= room) #this is the prefilled data when the roomform is accessed
+    if request.user != room.host:
+        messages.error(request, 'not authorized')
+        return HttpResponseRedirect('home')
     if request.method== 'POST':
         form= RoomForm(request.POST, instance=room)
         if form.is_valid():
             form.save()
             return redirect( to='home')
+
     context={'form':form}
     return render(request, 'base/room_form.html', context) 
 
+@login_required(login_url= 'login')
 def deleteRoom(request, pk):
     room= Room.objects.get(id=pk)
     if request.method== 'POST':
         room.delete()
         return redirect("home")
     return render(request, 'base/delete.html', {'obj':room})
+
+def logoutUser(request):
+    logout(request)
+    return redirect('home')
 # Create your views here.
