@@ -8,9 +8,12 @@ from django.contrib import messages
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
-from django.http import HttpResponse
+from django.contrib.auth.forms import UserCreationForm
 
 def loginpage(request):
+    page= 'login'
+    if request.user.is_authenticated:
+        return redirect('home')
     if request.method== 'POST':
         username= request.POST.get('username')
         password= request.POST.get('password')
@@ -28,8 +31,9 @@ def loginpage(request):
             return redirect('home')
         else:
             messages.error(request, 'username or password incorrect')
+    context={'page': page}
 
-    return render(request, 'base/login_registration.html')
+    return render(request, 'base/login_registration.html', context)
 
 
 
@@ -77,8 +81,7 @@ def updateRoom(request, pk):
     room= Room.objects.get(id=pk)
     form= RoomForm(instance= room) #this is the prefilled data when the roomform is accessed
     if request.user != room.host:
-        messages.error(request, 'not authorized')
-        return HttpResponseRedirect('home')
+        return HttpResponse('not authorized!')
     if request.method== 'POST':
         form= RoomForm(request.POST, instance=room)
         if form.is_valid():
@@ -91,6 +94,8 @@ def updateRoom(request, pk):
 @login_required(login_url= 'login')
 def deleteRoom(request, pk):
     room= Room.objects.get(id=pk)
+    if request.user != room.host:
+        return HttpResponse('not authorized!')
     if request.method== 'POST':
         room.delete()
         return redirect("home")
@@ -99,4 +104,13 @@ def deleteRoom(request, pk):
 def logoutUser(request):
     logout(request)
     return redirect('home')
+
+def registerUser(request):
+    form= UserCreationForm()
+    if request.method == 'POST':
+        form= UserCreationForm(request.POST)
+        if form.is_valid():
+            form.save(commit= False)
+    context={'form':form}
+    return render(request, 'base/login_registration.html', context)
 # Create your views here.
