@@ -15,8 +15,8 @@ def loginpage(request):
     if request.user.is_authenticated:
         return redirect('home')
     if request.method== 'POST':
-        username= request.POST.get('username')
-        password= request.POST.get('password')
+        username= request.POST.get('username').lower()
+        password= request.POST.get('password').lower()
 
         try:
             user= User.objects.get(username=username)
@@ -110,7 +110,14 @@ def registerUser(request):
     if request.method == 'POST':
         form= UserCreationForm(request.POST)
         if form.is_valid():
-            form.save(commit= False)
+            user=form.save(commit= False)
+            user.username= user.username.lower()
+            user.password= user.password.lower()
+            user.save()
+            login(request, user)
+            return redirect('home')
+        else:
+            messages.error(request, 'password or username incorrect')
     context={'form':form}
     return render(request, 'base/login_registration.html', context)
 # Create your views here.

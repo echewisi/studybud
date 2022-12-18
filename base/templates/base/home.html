@@ -3,6 +3,10 @@
 
 {%block content%}
 
+{%if request.user.is_authenticated%}
+    <h3> welcome {{request.user}}</h3>
+{%endif%}
+
 <style>
     .home-container{
         display: grid;
