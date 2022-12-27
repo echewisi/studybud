@@ -133,4 +133,15 @@ def registerUser(request):
             messages.error(request, 'password or username incorrect')
     context={'form':form}
     return render(request, 'base/login_registration.html', context)
+
+@login_required(login_url= 'login')
+def deleteMessage(request, pk):
+    room_message= Message.objects.get(id=pk)
+    if request.user != room_message.user:
+        return HttpResponse('you\'re not allowed here!')
+    
+    if request.method == 'POST':
+        room_message.delete()
+        return redirect('home')
+    return render(request, 'base/delete.html', {'obj': room_message})
 # Create your views here.
