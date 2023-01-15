@@ -77,6 +77,16 @@ def room(request, pk):
 
 
 @login_required(login_url= 'login')
+def user_profile(request, pk):
+    user= User.objects.get(id=pk)
+    rooms= user.room_set.all()
+    room_messages= user.message_set.all()
+    topics= Topic.objects.all()
+    context= {'user': user, 'rooms':rooms}
+    return render(request, 'base/profile.html', context )
+
+
+@login_required(login_url= 'login')
 def create_room(request):
     form = RoomForm
     if request.method == 'POST':
@@ -146,4 +156,6 @@ def deleteMessage(request, pk):
         room_message.delete()
         return redirect('home')
     return render(request, 'base/delete.html', {'obj': room_message})
+
+
 # Create your views here.
