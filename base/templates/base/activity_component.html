@@ -3,7 +3,7 @@
     <hr color="red">
     {%for room_message in room_messages%}
     <div>
-        <small>@{{room_message.user}} {{room_message.created|timesince}}</small>
+        <small><a href="{% url 'profile' room_message.user.id %}">@{{room_message.user}}</a> {{room_message.created|timesince}}</small>
         <small> commented on the room '{{room_message.room}}'</small>  
         <p>"{{room_message}}"</p>
         {%if request.user == room_message.user%}
