@@ -67,3 +67,8 @@ if (photoInput)
 // Scroll to Bottom
 const conversationThread = document.querySelector(".room__box");
 if (conversationThread) conversationThread.scrollTop = conversationThread.scrollHeight;
+
+//back button
+function goBack(){
+  window.history.back();
+}
