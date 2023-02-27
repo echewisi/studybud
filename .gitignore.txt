@@ -1,2 +1,0 @@
-base/profile_old.html/
-base/old.html/
